@@ -53,7 +53,7 @@ public class PiSimulator {
 	public double calculateSTD(ArrayList<Double> e, double m) {
 		double std = 0.0;
 		for(double est: e) {
-			std += Math.pow((est - m), 2);
+			std += (est - m) * (est - m);
 		}
 		
 		return Math.sqrt(std/e.size());

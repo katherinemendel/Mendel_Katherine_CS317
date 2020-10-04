@@ -5,8 +5,6 @@ public class PiSimulator {
 	
 	private int games;
 	private int darts;
-	private int totalInCircle = 0;
-	private ArrayList<Double> estimates = new ArrayList<Double>();
 	private double radius = 0.5;
 	
 	public PiSimulator(int g, int d) {
@@ -14,54 +12,55 @@ public class PiSimulator {
 		this.darts = d;
 	}
 	
-	public int getTotalInCircle() {
-		return totalInCircle;
-	}
-	
-	public ArrayList<Double> getEstimates(){
+	public double[] throwDarts() {
+		
+		int totalInCircle;
+		
+		double[] estimates = new double[games];
+		
+		for (int i = 0; i < games; i++) {
+			
+			totalInCircle = 0;
+			
+			for (int j = 0; j < darts; j++) {
+				// generate random x and y coordinates
+				double x = Math.random() - 0.5;
+				double y = Math.random() - 0.5;
+
+				double distance = Math.sqrt(x*x+y*y);
+				
+				if (distance <= this.radius) {
+					totalInCircle++;
+				}
+				
+				estimates[i] = (4 * ((double) totalInCircle / darts));
+			}
+			
+		}
+		
 		return estimates;
 	}
 	
-	public void addEstimate(double e) {
-		estimates.add(e);
-	}
-	
-	public void throwDart() {
-		
-		// generate random x and y coordinates
-		double x = Math.random() - 0.5;
-		double y = Math.random() - 0.5;
-		
-		double distance = Math.sqrt(x*x+y*y);
-		
-		if (distance <= this.radius) {
-			totalInCircle++;
-		}
-	}
-	
-	public double calculateMean(ArrayList<Double> e) {
+	public double calculateMean(double[] e) {
 		double sum = 0.0;
 		
 		for(double est: e) {
 			sum += est;
 		}
 			
-		return sum/e.size();
+		return sum/e.length;
 	}
 	
 
-	public double calculateSTD(ArrayList<Double> e, double m) {
+	public double calculateSTD(double[] e, double m) {
 		double std = 0.0;
 		for(double est: e) {
 			std += (est - m) * (est - m);
 		}
 		
-		return Math.sqrt(std/e.size());
+		return Math.sqrt(std/e.length);
 	}
-	
-	public void reset() {
-		totalInCircle = 0;
-	}
+
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,31 +75,18 @@ public class PiSimulator {
 		
 		PiSimulator sim = new PiSimulator(numGames, numDarts);
 		
-		
-		double estimatedPi;
+		double[] estimatedValues = sim.throwDarts();
 
-		// Loop for each game
-		for(int i = sim.games; i >0; i--) {
-
-			// Throw darts
-			for(int j = sim.darts; j > 0; j--) {
-
-				sim.throwDart();
-
-			}
-			// Estimate pi at end of game
-			estimatedPi = 4 * ((double) sim.getTotalInCircle() / numDarts);
-			sim.addEstimate(estimatedPi);
-			sim.reset();
-		}
-		
 		// Calculate overall statistics
-		double mean = sim.calculateMean(sim.getEstimates());
+		double mean = sim.calculateMean(estimatedValues);
 
-		System.out.println("Final estimate for pi: " + mean);
-		System.out.println("Actual error: " + Math.abs(Math.PI - mean)/Math.PI);
-		System.out.println("standard deviation: " + sim.calculateSTD(sim.getEstimates(), mean));
+		System.out.println("-----------------------------------------------------------");
+		System.out.println("Final estimate for pi: \t\t" + mean);
+		System.out.println("Actual error: \t\t\t" + Math.abs(Math.PI - mean)/Math.PI);
+		System.out.println("Standard deviation: \t\t" + sim.calculateSTD(estimatedValues, mean));
+		System.out.println("-----------------------------------------------------------");
 		
 		scan.close();
 	}
 }
+
